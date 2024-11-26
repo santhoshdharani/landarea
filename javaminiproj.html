@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shape Area Calculator</title>
+    <style>
+        /* CSS Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Shape Area Calculator</h1>
+       
+        <form id="shape-form">
+            <label for="shape">Select Shape:</label>
+            <select id="shape" name="shape" onchange="updateForm()">
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="triangle">Triangle</option>
+                <option value="trapezoid">Trapezoid</option>
+                <option value="square">Square</option>
+                <option value="parallelogram">Parallelogram</option>
+                <option value="rhombus">Rhombus</option>
+                <option value="ellipse">Ellipse</option>
+            </select>
+
+            <label for="unit">Select Unit:</label>
+            <select id="unit" name="unit">
+                <option value="meters">Meters</option>
+                <option value="centimeters">Centimeters</option>
+                <option value="inches">Inches</option>
+                <option value="yards">Yards</option>
+            </select>
+
+            <div id="form-fields">
+                <!-- Form fields will be injected here by JavaScript -->
+            </div>
+
+            <button type="button" onclick="calculateArea()">Calculate Area</button>
+        </form>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // JavaScript Code
+
+        // Conversion factors for length
+        const lengthConversionFactors = {
+            meters: { centimeters: 100, inches: 39.3701, yards: 1.09361 },
+            centimeters: { meters: 0.01, inches: 0.393701, yards: 0.0109361 },
+            inches: { meters: 0.0254, centimeters: 2.54, yards: 0.0277778 },
+            yards: { meters: 0.9144, centimeters: 91.44, inches: 36 }
+        };
+
+        // Conversion factors for area
+        const areaConversionFactors = {
+            meters: { centimeters: 10000, inches: 1550.0031, yards: 1.19599 },
+            centimeters: { meters: 0.0001, inches: 0.0015500031, yards: 0.000119599 },
+            inches: { meters: 0.00064516, centimeters: 0.64516, yards: 0.0007716 },
+            yards: { meters: 0.836127, centimeters: 83.6127, inches: 1.296 },
+        };
+
+        // Function to convert length to meters
+        function convertToMeters(value, unit) {
+            if (unit === 'meters') return value;
+            if (unit === 'centimeters') return value * lengthConversionFactors.centimeters.meters;
+            if (unit === 'inches') return value * lengthConversionFactors.inches.meters;
+            if (unit === 'yards') return value * lengthConversionFactors.yards.meters;
+            return value;
+        }
+
+        // Function to convert from meters to the selected length unit
+        function convertFromMeters(value, unit) {
+            if (unit === 'meters') return value;
+            if (unit === 'centimeters') return value * lengthConversionFactors.meters.centimeters;
+            if (unit === 'inches') return value * lengthConversionFactors.meters.inches;
+            if (unit === 'yards') return value * lengthConversionFactors.meters.yards;
+            return value;
+        }
+
+        // Function to convert area from square meters to the selected unit
+        function convertAreaFromSquareMeters(value, unit) {
+            if (unit === 'meters') return value;
+            if (unit === 'centimeters') return value * areaConversionFactors.meters.centimeters;
+            if (unit === 'inches') return value * areaConversionFactors.meters.inches;
+            if (unit === 'yards') return value * areaConversionFactors.meters.yards;
+            return value;
+        }
+
+        function updateForm() {
+            const shape = document.getElementById('shape').value;
+            const formFields = document.getElementById('form-fields');
+            
+            formFields.innerHTML = ''; // Clear existing fields
+
+            if (shape === 'rectangle') {
+                formFields.innerHTML = `\
+                    <label for="length">Length:</label>\
+                    <input type="number" id="length" step="any" required>\
+                    <label for="width">Width:</label>\
+                    <input type="number" id="width" step="any" required>\
+                `;
+            } else if (shape === 'circle') {
+                formFields.innerHTML = `\
+                    <label for="radius">Radius:</label>\
+                    <input type="number" id="radius" step="any" required>\
+                `;
+            } else if (shape === 'triangle') {
+                formFields.innerHTML = `\
+                    <label for="base">Base:</label>\
+                    <input type="number" id="base" step="any" required>\
+                    <label for="height">Height:</label>\
+                    <input type="number" id="height" step="any" required>\
+                `;
+            } else if (shape === 'trapezoid') {
+                formFields.innerHTML = `\
+                    <label for="base1">Base 1:</label>\
+                    <input type="number" id="base1" step="any" required>\
+                    <label for="base2">Base 2:</label>\
+                    <input type="number" id="base2" step="any" required>\
+                    <label for="height">Height:</label>\
+                    <input type="number" id="height" step="any" required>\
+                `;
+            } else if (shape === 'square') {
+                formFields.innerHTML = `\
+                    <label for="side">Side Length:</label>\
+                    <input type="number" id="side" step="any" required>\
+                `;
+            } else if (shape === 'parallelogram') {
+                formFields.innerHTML = `\
+                    <label for="base">Base:</label>\
+                    <input type="number" id="base" step="any" required>\
+                    <label for="height">Height:</label>\
+                    <input type="number" id="height" step="any" required>\
+                `;
+            } else if (shape === 'rhombus') {
+                formFields.innerHTML = `\
+                    <label for="diagonal1">Diagonal 1:</label>\
+                    <input type="number" id="diagonal1" step="any" required>\
+                    <label for="diagonal2">Diagonal 2:</label>\
+                    <input type="number" id="diagonal2" step="any" required>\
+                `;
+            } else if (shape === 'ellipse') {
+                formFields.innerHTML = `\
+                    <label for="major-axis">Major Axis (Radius):</label>\
+                    <input type="number" id="major-axis" step="any" required>\
+                    <label for="minor-axis">Minor Axis (Radius):</label>\
+                    <input type="number" id="minor-axis" step="any" required>\
+                `;
+            }
+        }
+
+        function calculateArea() {
+            const shape = document.getElementById('shape').value;
+            const unit = document.getElementById('unit').value;
+            let area;
+            let errorMessage = '';
+
+            let length, width, radius, base, height, base1, base2, diagonal1, diagonal2, majorAxis, minorAxis;
+
+            if (shape === 'rectangle') {
+                length = convertToMeters(parseFloat(document.getElementById('length').value), unit);
+                width = convertToMeters(parseFloat(document.getElementById('width').value), unit);
+                if (length <= 0 || width <= 0) {
+                    errorMessage = 'Length and width must be positive numbers.';
+                } else {
+                    area = length * width;
+                }
+            } else if (shape === 'circle') {
+                radius = convertToMeters(parseFloat(document.getElementById('radius').value), unit);
+                if (radius <= 0) {
+                    errorMessage = 'Radius must be a positive number.';
+                } else {
+                    area = Math.PI * radius * radius;
+                }
+            } else if (shape === 'triangle') {
+                base = convertToMeters(parseFloat(document.getElementById('base').value), unit);
+                height = convertToMeters(parseFloat(document.getElementById('height').value), unit);
+                if (base <= 0 || height <= 0) {
+                    errorMessage = 'Base and height must be positive numbers.';
+                } else {
+                    area = 0.5 * base * height;
+                }
+            } else if (shape === 'trapezoid') {
+                base1 = convertToMeters(parseFloat(document.getElementById('base1').value), unit);
+                base2 = convertToMeters(parseFloat(document.getElementById('base2').value), unit);
+                height = convertToMeters(parseFloat(document.getElementById('height').value), unit);
+                if (base1 <= 0 || base2 <= 0 || height <= 0) {
+                    errorMessage = 'Base 1, Base 2, and height must be positive numbers.';
+                } else {
+                    area = 0.5 * (base1 + base2) * height;
+                }
+            } else if (shape === 'square') {
+                length = convertToMeters(parseFloat(document.getElementById('side').value), unit);
+                if (length <= 0) {
+                    errorMessage = 'Side length must be a positive number.';
+                } else {
+                    area = length * length;
+                }
+            } else if (shape === 'parallelogram') {
+                base = convertToMeters(parseFloat(document.getElementById('base').value), unit);
+                height = convertToMeters(parseFloat(document.getElementById('height').value), unit);
+                if (base <= 0 || height <= 0) {
+                    errorMessage = 'Base and height must be positive numbers.';
+                } else {
+                    area = base * height;
+                }
+            } else if (shape === 'rhombus') {
+                diagonal1 = convertToMeters(parseFloat(document.getElementById('diagonal1').value), unit);
+                diagonal2 = convertToMeters(parseFloat(document.getElementById('diagonal2').value), unit);
+                if (diagonal1 <= 0 || diagonal2 <= 0) {
+                    errorMessage = 'Diagonals must be positive numbers.';
+                } else {
+                    area = 0.5 * diagonal1 * diagonal2;
+                }
+            } else if (shape === 'ellipse') {
+                majorAxis = convertToMeters(parseFloat(document.getElementById('major-axis').value), unit);
+                minorAxis = convertToMeters(parseFloat(document.getElementById('minor-axis').value), unit);
+                if (majorAxis <= 0 || minorAxis <= 0) {
+                    errorMessage = 'Major and minor axes must be positive numbers.';
+                } else {
+                    area = Math.PI * majorAxis * minorAxis;
+                }
+            }
+
+            // Display result
+            const resultDiv = document.getElementById('result');
+            if (errorMessage) {
+                resultDiv.innerHTML = `<span class="error">${errorMessage}</span>`;
+            } else if (area) {
+                const convertedArea = convertAreaFromSquareMeters(area, unit);
+                resultDiv.innerHTML = `The area of the ${shape} is ${convertedArea.toFixed(2)} square ${unit}.`;
+            } else {
+                resultDiv.innerHTML = 'Please fill in all required fields.';
+            }
+        }
+
+        // Initialize the form on page load
+        window.onload = updateForm;
+    </script>
+</body>
+</html>

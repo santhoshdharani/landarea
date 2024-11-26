@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Land Area Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to right, #4e54c8, #8f94fb);
+            color: #333;
+            transition: background-color 0.3s ease;
+        }
+        .header {
+            background-color: #4e54c8;
+            color: white;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #4e54c8;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        input:focus, select:focus {
+            border-color: #4e54c8;
+            box-shadow: 0 0 8px rgba(78, 84, 200, 0.5);
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+        }
+        .button-group button {
+            width: 48%;
+            padding: 10px;
+            font-size: 14px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .button-group button:hover {
+            transform: scale(1.05);
+            background-color: #218838;
+        }
+        .result, .error {
+            margin-top: 20px;
+            font-size: 18px;
+            text-align: center;
+            color: #333;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .error.show, .result.show {
+            opacity: 1;
+        }
+        .footer {
+            background-color: #4e54c8;
+            color: white;
+            text-align: center;
+            padding: 10px 0;
+            margin-top: 40px;
+        }
+        .dark-theme {
+            background: linear-gradient(to right, #333, #555);
+            color: #eee;
+        }
+        .dark-theme .container {
+            background-color: #444;
+            color: #eee;
+        }
+        .dark-theme .button-group button {
+            background-color: #666;
+        }
+        .canvas-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .history {
+    margin-top: 20px;
+    padding: 15px;
+    border-top: 1px solid #ddd;
+}
+
+.history h3 {
+    color: #4e54c8;
+}
+
+.history ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.history ul li {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Land Area Calculator</h1>
+        <button onclick="toggleTheme()">Toggle Theme</button>
+    </div>
+
+    <div class="container">
+        <div class="form-section">
+            <h2>Calculate the Area of Land Shapes</h2>
+            
+            <form id="shape-form">
+                <label for="shape">Select Shape:</label>
+                <select id="shape" name="shape" onchange="updateForm()">
+                    <option value="rectangle">Rectangle</option>
+                    <option value="circle">Circle</option>
+                    <option value="triangle">Triangle</option>
+                    <option value="trapezoid">Trapezoid</option>
+                    <option value="square">Square</option>
+                    <option value="parallelogram">Parallelogram</option>
+                    <option value="rhombus">Rhombus</option>
+                </select>
+
+                <label for="unit">Select Unit:</label>
+                <select id="unit" name="unit">
+                    <option value="meters">Meters</option>
+                    <option value="centimeters">Centimeters</option>
+                    <option value="inches">Inches</option>
+                    <option value="yards">Yards</option>
+                    <option value="millimeters">Millimeters</option>
+                    <option value="feet">Feet</option>
+                </select>
+
+                <div id="form-fields"></div>
+
+                <div class="button-group">
+                    <button type="button" onclick="calculateArea()">Calculate Area</button>
+                    <button type="button" onclick="resetForm()">Reset</button>
+                </div>
+            </form>
+
+            <div class="result" id="result"></div>
+            <div class="error" id="error"></div>
+            <div id="spinner" style="display:none; text-align: center;">Calculating...</div>
+        </div>
+        <div class="history" id="history">
+            <h3>Calculation History</h3>
+            <ul id="history-list"></ul>
+        </div>
+        
+        
+        <div class="canvas-container">
+            <h2>3D Dimension Preview</h2>
+            <canvas id="shapeCanvas" width="300" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2023 Land Area Calculator. All rights reserved.</p>
+    </div>
+
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-theme');
+        }
+
+        function updateForm() {
+            const shape = document.getElementById('shape').value;
+            const formFields = document.getElementById('form-fields');
+            formFields.innerHTML = '';
+            document.getElementById('error').innerText = '';
+
+            switch(shape) {
+                case 'rectangle':
+                    formFields.innerHTML = `<label>Length:</label><input type="number" id="length"><label>Width:</label><input type="number" id="width">`;
+                    break;
+                case 'circle':
+                    formFields.innerHTML = `<label>Radius:</label><input type="number" id="radius">`;
+                    break;
+                case 'triangle':
+                    formFields.innerHTML = `<label>Base:</label><input type="number" id="base"><label>Height:</label><input type="number" id="height">`;
+                    break;
+                case 'trapezoid':
+                    formFields.innerHTML = `<label>Base 1:</label><input type="number" id="base1"><label>Base 2:</label><input type="number" id="base2"><label>Height:</label><input type="number" id="height">`;
+                    break;
+                case 'square':
+                    formFields.innerHTML = `<label>Side:</label><input type="number" id="side">`;
+                    break;
+                case 'parallelogram':
+                    formFields.innerHTML = `<label>Base:</label><input type="number" id="baseP"><label>Height:</label><input type="number" id="heightP">`;
+                    break;
+                case 'rhombus':
+                    formFields.innerHTML = `<label>Diagonal 1:</label><input type="number" id="diag1"><label>Diagonal 2:</label><input type="number" id="diag2">`;
+                    break;
+            }
+            update3DView();
+        }
+
+        function update3DView() {
+            const shape = document.getElementById('shape').value;
+            const canvas = document.getElementById('shapeCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const length = parseFloat(document.getElementById('length')?.value) || 100;
+            const width = parseFloat(document.getElementById('width')?.value) || 100;
+            const radius = parseFloat(document.getElementById('radius')?.value) || 50;
+            const base1 = parseFloat(document.getElementById('base1')?.value) || 80;
+            const base2 = parseFloat(document.getElementById('base2')?.value) || 60;
+            const height = parseFloat(document.getElementById('height')?.value) || 60;
+            const side = parseFloat(document.getElementById('side')?.value) || 80;
+            const diag1 = parseFloat(document.getElementById('diag1')?.value) || 70;
+            const diag2 = parseFloat(document.getElementById('diag2')?.value) || 50;
+
+            ctx.beginPath();
+            switch(shape) {
+                case 'rectangle':
+                    ctx.rect(50, 50, length, width);
+                    break;
+                case 'circle':
+                    ctx.arc(150, 150, radius, 0, Math.PI * 2);
+                    break;
+                case 'triangle':
+                    ctx.moveTo(150, 50);
+                    ctx.lineTo(150 + base1 / 2, 50 + height);
+                    ctx.lineTo(150 - base1 / 2, 50 + height);
+                    ctx.closePath();
+                    break;
+                case 'trapezoid':
+                    ctx.moveTo(150 - base1 / 2, 50);
+                    ctx.lineTo(150 + base1 / 2, 50);
+                    ctx.lineTo(150 + base2 / 2, 50 + height);
+                    ctx.lineTo(150 - base2 / 2, 50 + height);
+                    ctx.closePath();
+                    break;
+                case 'square':
+                    ctx.rect(100, 100, side, side);
+                    break;
+                case 'parallelogram':
+                    ctx.moveTo(100, 50);
+                    ctx.lineTo(100 + length, 50);
+                    ctx.lineTo(100 + length - 20, 50 + height);
+                    ctx.lineTo(100 - 20, 50 + height);
+                    ctx.closePath();
+                    break;
+                case 'rhombus':
+                    ctx.moveTo(150, 50);
+                    ctx.lineTo(150 + diag1 / 2, 150);
+                    ctx.lineTo(150, 150 + diag2 / 2);
+                    ctx.lineTo(150 - diag1 / 2, 150);
+                    ctx.closePath();
+                    break;
+            }
+            ctx.stroke();
+        }
+
+        function calculateArea() {
+            const shape = document.getElementById('shape').value;
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            let area;
+
+            try {
+                switch(shape) {
+                    case 'rectangle':
+                        const length = parseFloat(document.getElementById('length').value);
+                        const width = parseFloat(document.getElementById('width').value);
+                        if (isNaN(length) || isNaN(width)) throw 'Please enter valid dimensions.';
+                        area = length * width;
+                        break;
+                    case 'circle':
+                        const radius = parseFloat(document.getElementById('radius').value);
+                        if (isNaN(radius)) throw 'Please enter a valid radius.';
+                        area = Math.PI * radius * radius;
+                        break;
+                    case 'triangle':
+                        const base = parseFloat(document.getElementById('base').value);
+                        const height = parseFloat(document.getElementById('height').value);
+                        if (isNaN(base) || isNaN(height)) throw 'Please enter valid dimensions.';
+                        area = 0.5 * base * height;
+                        break;
+                    case 'trapezoid':
+                        const base1 = parseFloat(document.getElementById('base1').value);
+                        const base2 = parseFloat(document.getElementById('base2').value);
+                        const heightT = parseFloat(document.getElementById('height').value);
+                        if (isNaN(base1) || isNaN(base2) || isNaN(heightT)) throw 'Please enter valid dimensions.';
+                        area = 0.5 * (base1 + base2) * heightT;
+                        break;
+                    case 'square':
+                        const side = parseFloat(document.getElementById('side').value);
+                        if (isNaN(side)) throw 'Please enter a valid side length.';
+                        area = side * side;
+                        break;
+                    case 'parallelogram':
+                        const baseP = parseFloat(document.getElementById('baseP').value);
+                        const heightP = parseFloat(document.getElementById('heightP').value);
+                        if (isNaN(baseP) || isNaN(heightP)) throw 'Please enter valid dimensions.';
+                        area = baseP * heightP;
+                        break;
+                    case 'rhombus':
+                        const diag1 = parseFloat(document.getElementById('diag1').value);
+                        const diag2 = parseFloat(document.getElementById('diag2').value);
+                        if (isNaN(diag1) || isNaN(diag2)) throw 'Please enter valid diagonals.';
+                        area = 0.5 * diag1 * diag2;
+                        break;
+                    default:
+                        throw 'Unsupported shape';
+                }
+                result.innerText = `Area: ${area.toFixed(2)} square units`;
+                error.classList.remove('show');
+                result.classList.add('show');
+                update3DView();
+            } catch (e) {
+                error.innerText = e;
+                error.classList.add('show');
+                result.classList.remove('show');
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('shape-form').reset();
+            document.getElementById('form-fields').
+            innerHTML = '';
+            document.getElementById('result').classList.remove('show');
+            document.getElementById('error').classList.remove('show');
+            update3DView();
+        }
+    </script>
+</body>
+</html>

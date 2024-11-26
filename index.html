@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Calculation</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Page background and container styling */
+        body {
+            background: linear-gradient(135deg, #e0f7fa, #80deea);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        /* Card style for form */
+        .container {
+            background: #ffffff;
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        /* Form title */
+        h1 {
+            font-size: 1.8em;
+            color: #00838f;
+            margin-bottom: 20px;
+        }
+
+        /* Input labels */
+        label {
+            display: block;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #00838f;
+        }
+
+        /* Select and input fields styling */
+        select, input[type="number"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 2px solid #00838f;
+            border-radius: 5px;
+            outline: none;
+            font-size: 1em;
+        }
+
+        /* Hover effect for select and input fields */
+        select:focus, input[type="number"]:focus {
+            border-color: #004d40;
+        }
+
+        /* Button styling */
+        input[type="submit"] {
+            background-color: #00838f;
+            color: #ffffff;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #004d40;
+        }
+
+        /* Instructions and field spacing */
+        #shapeInputs {
+            margin-top: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Container for the form -->
+    <div class="container">
+        <h1>Calculate Area</h1>
+        
+        <!-- Form with action pointing to history.php -->
+        <form action="history.php" method="POST">
+            <label for="shape">Select Shape:</label>
+            <select name="shape" id="shape" required>
+                <option value="rectangle">Rectangle</option>
+                <option value="circle">Circle</option>
+                <option value="triangle">Triangle</option>
+                <option value="square">Square</option>
+                <option value="parallelogram">Parallelogram</option>
+                <option value="rhombus">Rhombus</option>
+                <option value="trapezoid">Trapezoid</option>
+            </select>
+
+            <!-- Dynamic input fields will be displayed here based on shape selection -->
+            <div id="shapeInputs"></div>
+
+            <label for="unit">Select Unit:</label>
+            <select name="unit" id="unit" required>
+                <option value="sq.cm">Square Centimeters (sq.cm)</option>
+                <option value="sq.m">Square Meters (sq.m)</option>
+                <option value="sq.in">Square Inches (sq.in)</option>
+                <option value="sq.ft">Square Feet (sq.ft)</option>
+                <option value="sq.yd">Square Yards (sq.yd)</option>
+                <option value="acre">Acres (acre)</option>
+                <option value="sq.km">Square Kilometers (sq.km)</option>
+                <option value="sq.mi">Square Miles (sq.mi)</option>
+                <!-- Add more units as needed -->
+            </select>
+
+            <input type="submit" value="Calculate">
+        </form>
+    </div>
+
+    <!-- JavaScript to dynamically show input fields based on selected shape -->
+    <script>
+        const shapeSelect = document.getElementById('shape');
+        const shapeInputsDiv = document.getElementById('shapeInputs');
+
+        shapeSelect.addEventListener('change', function() {
+            const shape = shapeSelect.value;
+            shapeInputsDiv.innerHTML = '';  // Clear previous inputs
+
+            if (shape === 'rectangle') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="length">Length:</label>
+                    <input type="number" name="length" id="length" required>
+                    <label for="width">Width:</label>
+                    <input type="number" name="width" id="width" required>
+                `;
+            } else if (shape === 'circle') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="radius">Radius:</label>
+                    <input type="number" name="radius" id="radius" required>
+                `;
+            } else if (shape === 'triangle') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="base">Base:</label>
+                    <input type="number" name="base" id="base" required>
+                    <label for="height">Height:</label>
+                    <input type="number" name="height" id="height" required>
+                `;
+            } else if (shape === 'square') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="side">Side:</label>
+                    <input type="number" name="side" id="side" required>
+                `;
+            } else if (shape === 'parallelogram') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="baseP">Base:</label>
+                    <input type="number" name="baseP" id="baseP" required>
+                    <label for="heightP">Height:</label>
+                    <input type="number" name="heightP" id="heightP" required>
+                `;
+            } else if (shape === 'rhombus') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="diag1">Diagonal 1:</label>
+                    <input type="number" name="diag1" id="diag1" required>
+                    <label for="diag2">Diagonal 2:</label>
+                    <input type="number" name="diag2" id="diag2" required>
+                `;
+            } else if (shape === 'trapezoid') {
+                shapeInputsDiv.innerHTML = `
+                    <label for="base1">Base 1:</label>
+                    <input type="number" name="base1" id="base1" required>
+                    <label for="base2">Base 2:</label>
+                    <input type="number" name="base2" id="base2" required>
+                    <label for="height">Height:</label>
+                    <input type="number" name="height" id="height" required>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
